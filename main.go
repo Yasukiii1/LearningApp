@@ -129,21 +129,25 @@ var (
 )
 
 const (
-	sidebarWidthOpen   = 300
+	sidebarWidthOpen   = 308
 	sidebarWidthClosed = 72
 
-	searchX = 18
+	logoX = 18
+	logoY = 15
+	logoSize = 36
+
+	searchX = 64
 	searchY = 15
-	searchW = 222
+	searchW = 190
 	searchH = 36
 
-	toggleX = 248
+	toggleX = 264
 	toggleY = 15
-	toggleW = 36
+	toggleW = 28
 	toggleH = 36
 
 	iconSize  = 42
-	iconStart = 86
+	iconStart = 82
 	iconGap   = 58
 
 	profileBottomHeight = 98
@@ -359,6 +363,23 @@ func drawSidebar(hdc uintptr, client RECT) {
 		)
 	}
 
+	// Notification control in the main content header.
+	fillRoundRect(
+		hdc,
+		RECT{client.Right - 70, 17, client.Right - 34, 53},
+		rgb(255, 255, 255),
+		rgb(224, 224, 224),
+		12,
+	)
+	drawText(
+		hdc,
+		"○",
+		RECT{client.Right - 70, 17, client.Right - 34, 53},
+		rgb(70, 70, 70),
+		uiBoldFont,
+		DT_CENTER|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
+	)
+
 	// Profile row.
 	profileY := client.Bottom - profileBottomHeight
 	avatar := RECT{18, profileY + 7, 54, profileY + 43}
@@ -395,10 +416,25 @@ func drawSidebar(hdc uintptr, client RECT) {
 		rgb(224, 224, 224),
 		10,
 	)
+	fillRoundRect(
+		hdc,
+		RECT{24, settingsY + 1, 54, settingsY + 31},
+		rgb(255, 255, 255),
+		rgb(224, 224, 224),
+		9,
+	)
+	drawText(
+		hdc,
+		"⚙",
+		RECT{24, settingsY + 1, 54, settingsY + 31},
+		rgb(80, 80, 80),
+		uiFont,
+		DT_CENTER|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
+	)
 	drawText(
 		hdc,
 		"Settings",
-		RECT{34, settingsY, int32(sidebarWidth - 24), settingsY + settingsHeight},
+		RECT{66, settingsY, int32(sidebarWidth - 24), settingsY + settingsHeight},
 		rgb(70, 70, 70),
 		uiFont,
 		DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
@@ -437,7 +473,7 @@ func wndProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			return 0
 		}
 
-		if !sidebarOpen && pointInRect(x, y, 16, 12, 58, 54) {
+		if !sidebarOpen && pointInRect(x, y, 17, 63, 56, 104) {
 			sidebarOpen = true
 			layoutSearchBox()
 			invalidate(hwnd)
