@@ -28,7 +28,7 @@ This file is the personal directory/checkpoint note and is intentionally ignored
 - Checkpoint 0: initial executable
 - Checkpoint 1: source code, build script, and basic white/yellow UI
 - Sidebar base implementation is now in source code.
-- Go build environment still needs to be installed/configured locally.
+- Local Go build environment needs to be available in CMD.
 
 ## UI reference
 
@@ -58,8 +58,28 @@ This is Unicode Mathematical Bold styling, not the name of a normal UI font. Fin
 
 - The app uses a normal Windows application window.
 - The window is resizable and supports the standard minimize, maximize/restore, and close controls supplied by the operating system.
-- The main content currently uses a white background with a soft yellow sidebar/header treatment.
+- The application launches maximized while retaining the standard Windows title-bar controls.
+
+### Visual direction
+
+- Keep the existing overall sidebar structure rather than replacing it with a different navigation model.
+- Move the base palette away from yellow toward a clean neutral grey/white appearance.
+- Keep controls simple, light, rounded, and visually restrained.
+- Blank square sidebar icons remain intentionally blank until their purposes are decided.
+- The sidebar direction takes general inspiration from modern note/knowledge applications that combine a compact search area, sparse navigation, and lower utility/profile controls.
+
+## Accepted initial subjects
+
+These are the only subjects planned for the initial version:
+
+1. English First Language
+2. Chemistry
+3. Physics
+4. Add Maths
+5. Maths
+6. Malay
+7. Chinese
 
 ## Planning status
 
-Sidebar planning is currently the first major planning task. Chapters and other learning systems will be planned later.
+Sidebar planning is currently the first major planning task. Chapter structure, learning workflows, visual tools, storage, and AI generation systems will be planned later.
