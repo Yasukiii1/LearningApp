@@ -11,13 +11,13 @@ const (
 	WS_OVERLAPPEDWINDOW = 0x00CF0000
 	WS_VISIBLE          = 0x10000000
 	WS_CHILD            = 0x40000000
-	WS_BORDER            = 0x00800000
-	WS_TABSTOP           = 0x00010000
+	WS_BORDER           = 0x00800000
+	WS_TABSTOP          = 0x00010000
 	ES_AUTOHSCROLL      = 0x0080
 	ES_LEFT             = 0x0000
 
 	CW_USEDEFAULT = 0x80000000
-	SW_SHOW        = 5
+	SW_SHOW       = 5
 
 	WM_DESTROY     = 0x0002
 	WM_PAINT       = 0x000F
@@ -25,8 +25,6 @@ const (
 	WM_ERASEBKGND  = 0x0014
 	WM_LBUTTONDOWN = 0x0201
 	WM_SETFONT     = 0x0030
-	WM_SETFOCUS    = 0x0007
-	WM_KILLFOCUS   = 0x0008
 
 	CS_HREDRAW = 0x0002
 	CS_VREDRAW = 0x0001
@@ -42,8 +40,11 @@ const (
 
 	EM_SETCUEBANNER = 0x1501
 	EM_SETMARGINS   = 0x00D3
+	EC_LEFTMARGIN   = 0x0001
 
-	EC_LEFTMARGIN = 0x0001
+	SWP_NOZORDER   = 0x0004
+	SWP_NOACTIVATE = 0x0010
+	SWP_NOSIZE     = 0x0001
 )
 
 type POINT struct {
@@ -78,13 +79,13 @@ type WNDCLASSEX struct {
 	LpfnWndProc   uintptr
 	CbClsExtra     int32
 	CbWndExtra     int32
-	HInstance      uintptr
-	HIcon          uintptr
-	HCursor        uintptr
+	HInstance     uintptr
+	HIcon         uintptr
+	HCursor       uintptr
 	HbrBackground uintptr
-	LpszMenuName   *uint16
-	LpszClassName  *uint16
-	HIconSm        uintptr
+	LpszMenuName  *uint16
+	LpszClassName *uint16
+	HIconSm       uintptr
 }
 
 var (
@@ -115,17 +116,13 @@ var (
 	procSetTextColor       = gdi32.NewProc("SetTextColor")
 	procDrawTextW          = user32.NewProc("DrawTextW")
 	procCreateFontW        = gdi32.NewProc("CreateFontW")
-	procCreateWindowExW    = user32.NewProc("CreateWindowExW")
 	procSendMessageW       = user32.NewProc("SendMessageW")
-	procShowWindowChild    = user32.NewProc("ShowWindow")
 	procSetWindowPos       = user32.NewProc("SetWindowPos")
-	procGetDC              = user32.NewProc("GetDC")
-	procReleaseDC          = user32.NewProc("ReleaseDC")
 )
 
 var (
-	mainWindow uintptr
-	searchBox  uintptr
+	mainWindow  uintptr
+	searchBox   uintptr
 	sidebarOpen = true
 
 	uiFont     uintptr
@@ -135,8 +132,6 @@ var (
 const (
 	sidebarWidthOpen   = 290
 	sidebarWidthClosed = 76
-
-	topBarHeight = 64
 
 	searchX = 18
 	searchY = 15
@@ -257,29 +252,30 @@ func fillRoundRect(hdc uintptr, rect RECT, fill uint32, border uint32, radius in
 	procDeleteObject.Call(pen)
 }
 
+func invalidate(hwnd uintptr) {
+	user32.NewProc("InvalidateRect").Call(hwnd, 0, 1)
+}
+
 func layoutSearchBox() {
-	if searchBox == 0 || mainWindow == 0 {
+	if searchBox == 0 {
 		return
 	}
 
-	width := sidebarWidthOpen
 	if !sidebarOpen {
-		procShowWindowChild.Call(searchBox, 0)
+		procShowWindow.Call(searchBox, 0)
 		return
 	}
 
-	procShowWindowChild.Call(searchBox, SW_SHOW)
+	procShowWindow.Call(searchBox, SW_SHOW)
 	procSetWindowPos.Call(
 		searchBox,
 		0,
-		searchX,
-		searchY,
-		searchW,
-		searchH,
-		0x0010|0x0020,
+		searchX+2,
+		searchY+2,
+		searchW-4,
+		searchH-4,
+		SWP_NOZORDER|SWP_NOACTIVATE,
 	)
-
-	_ = width
 }
 
 func drawSidebar(hdc uintptr, client RECT) {
@@ -288,12 +284,10 @@ func drawSidebar(hdc uintptr, client RECT) {
 		sidebarWidth = sidebarWidthClosed
 	}
 
-	// Main white canvas.
 	base := makeBrush(rgb(255, 255, 255))
 	procFillRect.Call(hdc, uintptr(unsafe.Pointer(&client)), base)
 	procDeleteObject.Call(base)
 
-	// Sidebar surface.
 	sidebarRect := RECT{
 		Left:   0,
 		Top:    0,
@@ -305,10 +299,17 @@ func drawSidebar(hdc uintptr, client RECT) {
 	procDeleteObject.Call(sidebarBrush)
 
 	if !sidebarOpen {
+		fillRoundRect(
+			hdc,
+			RECT{20, 15, 54, 49},
+			rgb(255, 239, 170),
+			rgb(232, 211, 122),
+			10,
+		)
 		drawText(
 			hdc,
 			"☰",
-			RECT{18, 15, 58, 55},
+			RECT{20, 15, 54, 49},
 			rgb(75, 70, 55),
 			uiBoldFont,
 			DT_CENTER|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
@@ -316,7 +317,6 @@ func drawSidebar(hdc uintptr, client RECT) {
 		return
 	}
 
-	// Search field background/border.
 	fillRoundRect(
 		hdc,
 		RECT{searchX - 1, searchY - 1, searchX + searchW + 1, searchY + searchH + 1},
@@ -325,7 +325,6 @@ func drawSidebar(hdc uintptr, client RECT) {
 		10,
 	)
 
-	// Toggle.
 	fillRoundRect(
 		hdc,
 		RECT{toggleX, toggleY, toggleX + toggleW, toggleY + toggleH},
@@ -342,7 +341,6 @@ func drawSidebar(hdc uintptr, client RECT) {
 		DT_CENTER|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
 	)
 
-	// Five blank smooth square placeholders.
 	for i := 0; i < 5; i++ {
 		y := iconStart + i*iconGap
 		fillRoundRect(
@@ -354,10 +352,15 @@ func drawSidebar(hdc uintptr, client RECT) {
 		)
 	}
 
-	// Profile row above settings.
 	profileY := client.Bottom - 94
 	avatar := RECT{18, profileY + 5, 54, profileY + 41}
-	fillRoundRect(hdc, avatar, rgb(255, 220, 110), rgb(238, 201, 89), 18)
+	fillRoundRect(
+		hdc,
+		avatar,
+		rgb(255, 220, 110),
+		rgb(238, 201, 89),
+		18,
+	)
 	drawText(
 		hdc,
 		"D",
@@ -369,17 +372,16 @@ func drawSidebar(hdc uintptr, client RECT) {
 	drawText(
 		hdc,
 		"Darius",
-		RECT{66, profileY + 4, sidebarWidth - 18, profileY + 42},
+		RECT{66, profileY + 4, int32(sidebarWidth - 18), profileY + 42},
 		rgb(55, 55, 55),
 		uiFont,
 		DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
 	)
 
-	// Settings placeholder at bottom.
 	settingsY := client.Bottom - 48
 	fillRoundRect(
 		hdc,
-		RECT{18, settingsY, sidebarWidth - 18, settingsY + 34},
+		RECT{18, settingsY, int32(sidebarWidth - 18), settingsY + 34},
 		rgb(255, 244, 190),
 		rgb(232, 211, 122),
 		10,
@@ -387,17 +389,16 @@ func drawSidebar(hdc uintptr, client RECT) {
 	drawText(
 		hdc,
 		"Settings",
-		RECT{34, settingsY, sidebarWidth - 24, settingsY + 34},
+		RECT{34, settingsY, int32(sidebarWidth - 24), settingsY + 34},
 		rgb(75, 70, 55),
 		uiFont,
 		DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
 	)
 
-	// App content title.
 	drawText(
 		hdc,
 		"LearningApp",
-		RECT{sidebarWidth + 36, 22, client.Right - 36, 58},
+		RECT{int32(sidebarWidth) + 36, 22, client.Right - 36, 58},
 		rgb(55, 55, 55),
 		uiBoldFont,
 		DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
@@ -408,7 +409,7 @@ func wndProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 	switch msg {
 	case WM_SIZE:
 		layoutSearchBox()
-		Invalidate(hwnd)
+		invalidate(hwnd)
 		return 0
 
 	case WM_ERASEBKGND:
@@ -432,20 +433,19 @@ func wndProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 
 		if sidebarOpen && pointInRect(x, y, toggleX, toggleY, toggleX+toggleW, toggleY+toggleH) {
 			sidebarOpen = false
-			if searchBox != 0 {
-				procShowWindowChild.Call(searchBox, 0)
-			}
-			Invalidate(hwnd)
+			layoutSearchBox()
+			invalidate(hwnd)
 			return 0
 		}
 
-		if !sidebarOpen && pointInRect(x, y, 16, 14, 60, 58) {
+		if !sidebarOpen && pointInRect(x, y, 18, 13, 58, 53) {
 			sidebarOpen = true
 			layoutSearchBox()
-			Invalidate(hwnd)
+			invalidate(hwnd)
 			return 0
 		}
 
+		// Placeholder sidebar controls intentionally have no actions yet.
 		return 0
 
 	case WM_DESTROY:
@@ -463,21 +463,18 @@ func wndProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 	return ret
 }
 
-func Invalidate(hwnd uintptr) {
-	user32.NewProc("InvalidateRect").Call(hwnd, 0, 1)
-}
-
 func createSearchBox(parent uintptr) uintptr {
 	edit, _, _ := procCreateWindowExW.Call(
 		0,
 		uintptr(unsafe.Pointer(wstr("EDIT"))),
 		uintptr(unsafe.Pointer(wstr(""))),
 		WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_LEFT|ES_AUTOHSCROLL,
-		uintptr(searchX+3),
-		uintptr(searchY+3),
-		uintptr(searchW-6),
-		uintptr(searchH-6),
+		searchX+3,
+		searchY+3,
+		searchW-6,
+		searchH-6,
 		parent,
+		0,
 		0,
 		0,
 		0,
@@ -485,9 +482,14 @@ func createSearchBox(parent uintptr) uintptr {
 
 	if edit != 0 {
 		setFont(edit, uiFont)
-		margin := uintptr(6) | (uintptr(6) << 16)
+		margin := uintptr(8) | (uintptr(8) << 16)
 		procSendMessageW.Call(edit, EM_SETMARGINS, EC_LEFTMARGIN, margin)
-		procSendMessageW.Call(edit, EM_SETCUEBANNER, 0, uintptr(unsafe.Pointer(wstr("Search notes..."))))
+		procSendMessageW.Call(
+			edit,
+			EM_SETCUEBANNER,
+			0,
+			uintptr(unsafe.Pointer(wstr("Search notes..."))),
+		)
 	}
 
 	return edit
@@ -504,7 +506,7 @@ func main() {
 		CbSize:        uint32(unsafe.Sizeof(WNDCLASSEX{})),
 		Style:         CS_HREDRAW | CS_VREDRAW,
 		LpfnWndProc:   syscall.NewCallback(wndProc),
-		HCursor:       func() uintptr {
+		HCursor: func() uintptr {
 			cursor, _, _ := procLoadCursorW.Call(0, IDC_ARROW)
 			return cursor
 		}(),
@@ -535,7 +537,6 @@ func main() {
 	}
 
 	mainWindow = hwnd
-
 	searchBox = createSearchBox(hwnd)
 
 	procShowWindow.Call(hwnd, SW_SHOW)
