@@ -27,6 +27,7 @@ This file is the personal directory/checkpoint note and is intentionally ignored
 - Branch: main
 - Checkpoint 0: initial executable
 - Checkpoint 1: source code, build script, and basic white/yellow UI
+- Sidebar base implementation is now in source code.
 - Go build environment still needs to be installed/configured locally.
 
 ## UI reference
@@ -45,13 +46,19 @@ This is Unicode Mathematical Bold styling, not the name of a normal UI font. Fin
 - The top-left navigation row will be:
   [ Search notes... ]  [☰]
 - The search field will be used to search saved note names.
-- The sidebar will initially contain at least five icon slots/buttons as placeholders.
+- The sidebar will initially contain at least five blank smooth square icon slots/buttons as placeholders.
 - The purposes, names, and final icons for those five or more slots are not decided yet.
 - Slightly above the bottom of the sidebar there will be a profile row containing a profile icon/avatar and the user's name, following a compact layout similar to the ChatGPT sidebar.
 - At the bottom of the sidebar there will be a simple Settings item/button.
 - Settings is a placeholder for now and will do nothing initially.
-- The sidebar's detailed layout, sizing, spacing, active states, and visual styling will be planned before implementation.
+- The sidebar's detailed layout, sizing, spacing, active states, and visual styling will be refined after the base UI is working.
 - Hover/meaning indicators and their animations are planned for a later stage after the base UI is complete.
+
+### Application window
+
+- The app uses a normal Windows application window.
+- The window is resizable and supports the standard minimize, maximize/restore, and close controls supplied by the operating system.
+- The main content currently uses a white background with a soft yellow sidebar/header treatment.
 
 ## Planning status
 
