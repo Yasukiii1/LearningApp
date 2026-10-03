@@ -37,6 +37,16 @@ Preferred text style reference:
 
 This is Unicode Mathematical Bold styling, not the name of a normal UI font. Final UI typography has not been chosen yet.
 
+## Accepted UI planning
+
+### Sidebar
+
+- The application will have a collapsible sidebar.
+- The sidebar open/close control will be positioned at the top-left, inspired by the compact sidebar toggle used in ChatGPT.
+- A search button will be part of the sidebar/navigation area.
+- The specific sidebar icons, labels, layout, and visual design will be planned separately.
+- Hover/meaning indicators and their animations are planned for a later stage after the base UI is complete.
+
 ## Planning status
 
-Detailed application planning has NOT started yet.
+Detailed application planning is still in progress.
