@@ -11,13 +11,16 @@ const (
 	WS_OVERLAPPEDWINDOW = 0x00CF0000
 	WS_VISIBLE          = 0x10000000
 	WS_CHILD            = 0x40000000
-	WS_BORDER           = 0x00800000
 	WS_TABSTOP          = 0x00010000
 	ES_AUTOHSCROLL      = 0x0080
 	ES_LEFT             = 0x0000
 
-	CW_USEDEFAULT = 0x80000000
-	SW_SHOW       = 5
+	CW_USEDEFAULT     = 0x80000000
+	SW_SHOW           = 5
+	SW_SHOWMAXIMIZED  = 3
+	SWP_NOSIZE        = 0x0001
+	SWP_NOZORDER      = 0x0004
+	SWP_NOACTIVATE    = 0x0010
 
 	WM_DESTROY     = 0x0002
 	WM_PAINT       = 0x000F
@@ -41,10 +44,6 @@ const (
 	EM_SETCUEBANNER = 0x1501
 	EM_SETMARGINS   = 0x00D3
 	EC_LEFTMARGIN   = 0x0001
-
-	SWP_NOZORDER   = 0x0004
-	SWP_NOACTIVATE = 0x0010
-	SWP_NOSIZE     = 0x0001
 )
 
 type POINT struct {
@@ -92,32 +91,32 @@ var (
 	user32 = syscall.NewLazyDLL("user32.dll")
 	gdi32  = syscall.NewLazyDLL("gdi32.dll")
 
-	procRegisterClassExW   = user32.NewProc("RegisterClassExW")
-	procCreateWindowExW    = user32.NewProc("CreateWindowExW")
-	procDefWindowProcW     = user32.NewProc("DefWindowProcW")
-	procShowWindow         = user32.NewProc("ShowWindow")
-	procUpdateWindow       = user32.NewProc("UpdateWindow")
-	procGetMessageW        = user32.NewProc("GetMessageW")
-	procTranslateMessage  = user32.NewProc("TranslateMessage")
-	procDispatchMessageW   = user32.NewProc("DispatchMessageW")
-	procPostQuitMessage    = user32.NewProc("PostQuitMessage")
-	procLoadCursorW        = user32.NewProc("LoadCursorW")
-	procSetCursor          = user32.NewProc("SetCursor")
-	procGetClientRect      = user32.NewProc("GetClientRect")
-	procBeginPaint         = user32.NewProc("BeginPaint")
-	procEndPaint           = user32.NewProc("EndPaint")
-	procFillRect           = user32.NewProc("FillRect")
-	procCreateSolidBrush   = gdi32.NewProc("CreateSolidBrush")
-	procCreatePen          = gdi32.NewProc("CreatePen")
-	procSelectObject       = gdi32.NewProc("SelectObject")
-	procDeleteObject       = gdi32.NewProc("DeleteObject")
-	procRoundRect          = gdi32.NewProc("RoundRect")
-	procSetBkMode          = gdi32.NewProc("SetBkMode")
-	procSetTextColor       = gdi32.NewProc("SetTextColor")
-	procDrawTextW          = user32.NewProc("DrawTextW")
-	procCreateFontW        = gdi32.NewProc("CreateFontW")
-	procSendMessageW       = user32.NewProc("SendMessageW")
-	procSetWindowPos       = user32.NewProc("SetWindowPos")
+	procRegisterClassExW  = user32.NewProc("RegisterClassExW")
+	procCreateWindowExW   = user32.NewProc("CreateWindowExW")
+	procDefWindowProcW    = user32.NewProc("DefWindowProcW")
+	procShowWindow        = user32.NewProc("ShowWindow")
+	procUpdateWindow      = user32.NewProc("UpdateWindow")
+	procGetMessageW       = user32.NewProc("GetMessageW")
+	procTranslateMessage = user32.NewProc("TranslateMessage")
+	procDispatchMessageW  = user32.NewProc("DispatchMessageW")
+	procPostQuitMessage   = user32.NewProc("PostQuitMessage")
+	procLoadCursorW       = user32.NewProc("LoadCursorW")
+	procGetClientRect     = user32.NewProc("GetClientRect")
+	procBeginPaint        = user32.NewProc("BeginPaint")
+	procEndPaint          = user32.NewProc("EndPaint")
+	procFillRect          = user32.NewProc("FillRect")
+	procCreateSolidBrush  = gdi32.NewProc("CreateSolidBrush")
+	procCreatePen         = gdi32.NewProc("CreatePen")
+	procSelectObject      = gdi32.NewProc("SelectObject")
+	procDeleteObject      = gdi32.NewProc("DeleteObject")
+	procRoundRect         = gdi32.NewProc("RoundRect")
+	procSetBkMode         = gdi32.NewProc("SetBkMode")
+	procSetTextColor      = gdi32.NewProc("SetTextColor")
+	procDrawTextW         = user32.NewProc("DrawTextW")
+	procCreateFontW       = gdi32.NewProc("CreateFontW")
+	procSendMessageW      = user32.NewProc("SendMessageW")
+	procSetWindowPos      = user32.NewProc("SetWindowPos")
+	procInvalidateRect    = user32.NewProc("InvalidateRect")
 )
 
 var (
@@ -130,22 +129,25 @@ var (
 )
 
 const (
-	sidebarWidthOpen   = 290
-	sidebarWidthClosed = 76
+	sidebarWidthOpen   = 300
+	sidebarWidthClosed = 72
 
 	searchX = 18
 	searchY = 15
-	searchW = 210
-	searchH = 34
+	searchW = 222
+	searchH = 36
 
-	toggleX = 238
+	toggleX = 248
 	toggleY = 15
-	toggleW = 34
-	toggleH = 34
+	toggleW = 36
+	toggleH = 36
 
 	iconSize  = 42
-	iconStart = 92
+	iconStart = 86
 	iconGap   = 58
+
+	profileBottomHeight = 98
+	settingsHeight      = 38
 )
 
 func wstr(s string) *uint16 {
@@ -206,7 +208,7 @@ func setFont(hwnd, font uintptr) {
 	procSendMessageW.Call(hwnd, WM_SETFONT, font, 1)
 }
 
-func drawText(hdc uintptr, text string, rect RECT, color uint32, font uintptr, flags uintptr) {
+func drawText(hdc uintptr, value string, rect RECT, color uint32, font uintptr, flags uintptr) {
 	var oldFont uintptr
 	if font != 0 {
 		oldFont, _, _ = procSelectObject.Call(hdc, font)
@@ -215,7 +217,7 @@ func drawText(hdc uintptr, text string, rect RECT, color uint32, font uintptr, f
 	procSetBkMode.Call(hdc, TRANSPARENT)
 	procSetTextColor.Call(hdc, uintptr(color))
 
-	ptr := wstr(text)
+	ptr := wstr(value)
 	procDrawTextW.Call(
 		hdc,
 		uintptr(unsafe.Pointer(ptr)),
@@ -229,7 +231,7 @@ func drawText(hdc uintptr, text string, rect RECT, color uint32, font uintptr, f
 	}
 }
 
-func fillRoundRect(hdc uintptr, rect RECT, fill uint32, border uint32, radius int) {
+func fillRoundRect(hdc uintptr, rect RECT, fill, border uint32, radius int) {
 	brush := makeBrush(fill)
 	pen := makePen(border)
 
@@ -253,7 +255,7 @@ func fillRoundRect(hdc uintptr, rect RECT, fill uint32, border uint32, radius in
 }
 
 func invalidate(hwnd uintptr) {
-	user32.NewProc("InvalidateRect").Call(hwnd, 0, 1)
+	procInvalidateRect.Call(hwnd, 0, 1)
 }
 
 func layoutSearchBox() {
@@ -284,123 +286,121 @@ func drawSidebar(hdc uintptr, client RECT) {
 		sidebarWidth = sidebarWidthClosed
 	}
 
+	// Main content.
 	base := makeBrush(rgb(255, 255, 255))
 	procFillRect.Call(hdc, uintptr(unsafe.Pointer(&client)), base)
 	procDeleteObject.Call(base)
 
+	// Light neutral sidebar.
 	sidebarRect := RECT{
 		Left:   0,
 		Top:    0,
 		Right:  int32(sidebarWidth),
 		Bottom: client.Bottom,
 	}
-	sidebarBrush := makeBrush(rgb(255, 249, 224))
+	sidebarBrush := makeBrush(rgb(246, 246, 246))
 	procFillRect.Call(hdc, uintptr(unsafe.Pointer(&sidebarRect)), sidebarBrush)
 	procDeleteObject.Call(sidebarBrush)
 
 	if !sidebarOpen {
 		fillRoundRect(
 			hdc,
-			RECT{20, 15, 54, 49},
-			rgb(255, 239, 170),
-			rgb(232, 211, 122),
+			RECT{19, 15, 53, 49},
+			rgb(255, 255, 255),
+			rgb(220, 220, 220),
 			10,
 		)
 		drawText(
 			hdc,
-			"☰",
-			RECT{20, 15, 54, 49},
-			rgb(75, 70, 55),
+			"≡",
+			RECT{19, 15, 53, 49},
+			rgb(70, 70, 70),
 			uiBoldFont,
 			DT_CENTER|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
 		)
 		return
 	}
 
+	// Search field backing.
 	fillRoundRect(
 		hdc,
 		RECT{searchX - 1, searchY - 1, searchX + searchW + 1, searchY + searchH + 1},
-		rgb(238, 229, 200),
-		rgb(238, 229, 200),
+		rgb(255, 255, 255),
+		rgb(220, 220, 220),
 		10,
 	)
 
+	// Sidebar toggle.
 	fillRoundRect(
 		hdc,
 		RECT{toggleX, toggleY, toggleX + toggleW, toggleY + toggleH},
-		rgb(255, 239, 170),
-		rgb(232, 211, 122),
+		rgb(255, 255, 255),
+		rgb(220, 220, 220),
 		10,
 	)
 	drawText(
 		hdc,
-		"☰",
+		"≡",
 		RECT{toggleX, toggleY, toggleX + toggleW, toggleY + toggleH},
-		rgb(75, 70, 55),
+		rgb(70, 70, 70),
 		uiBoldFont,
 		DT_CENTER|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
 	)
 
+	// Blank smooth square placeholders.
 	for i := 0; i < 5; i++ {
 		y := iconStart + i*iconGap
 		fillRoundRect(
 			hdc,
 			RECT{24, int32(y), 24 + iconSize, int32(y + iconSize)},
-			rgb(255, 244, 190),
-			rgb(232, 211, 122),
+			rgb(255, 255, 255),
+			rgb(224, 224, 224),
 			11,
 		)
 	}
 
-	profileY := client.Bottom - 94
-	avatar := RECT{18, profileY + 5, 54, profileY + 41}
+	// Profile row.
+	profileY := client.Bottom - profileBottomHeight
+	avatar := RECT{18, profileY + 7, 54, profileY + 43}
 	fillRoundRect(
 		hdc,
 		avatar,
-		rgb(255, 220, 110),
-		rgb(238, 201, 89),
+		rgb(232, 232, 232),
+		rgb(214, 214, 214),
 		18,
 	)
 	drawText(
 		hdc,
 		"D",
 		avatar,
-		rgb(85, 70, 25),
+		rgb(75, 75, 75),
 		uiBoldFont,
 		DT_CENTER|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
 	)
 	drawText(
 		hdc,
 		"Darius",
-		RECT{66, profileY + 4, int32(sidebarWidth - 18), profileY + 42},
-		rgb(55, 55, 55),
+		RECT{66, profileY + 5, int32(sidebarWidth - 18), profileY + 43},
+		rgb(45, 45, 45),
 		uiFont,
 		DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
 	)
 
+	// Settings placeholder.
 	settingsY := client.Bottom - 48
 	fillRoundRect(
 		hdc,
-		RECT{18, settingsY, int32(sidebarWidth - 18), settingsY + 34},
-		rgb(255, 244, 190),
-		rgb(232, 211, 122),
+		RECT{18, settingsY, int32(sidebarWidth - 18), settingsY + settingsHeight},
+		rgb(255, 255, 255),
+		rgb(224, 224, 224),
 		10,
 	)
 	drawText(
 		hdc,
 		"Settings",
-		RECT{34, settingsY, int32(sidebarWidth - 24), settingsY + 34},
-		rgb(75, 70, 55),
+		RECT{34, settingsY, int32(sidebarWidth - 24), settingsY + settingsHeight},
+		rgb(70, 70, 70),
 		uiFont,
-		DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
-	)
-
-	drawText(
-		hdc,
-		"LearningApp",
-		RECT{int32(sidebarWidth) + 36, 22, client.Right - 36, 58},
-		rgb(55, 55, 55),
-		uiBoldFont,
 		DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX,
 	)
 }
@@ -421,7 +421,6 @@ func wndProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 
 		var client RECT
 		procGetClientRect.Call(hwnd, uintptr(unsafe.Pointer(&client)))
-
 		drawSidebar(hdc, client)
 
 		procEndPaint.Call(hwnd, uintptr(unsafe.Pointer(&ps)))
@@ -438,7 +437,7 @@ func wndProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			return 0
 		}
 
-		if !sidebarOpen && pointInRect(x, y, 18, 13, 58, 53) {
+		if !sidebarOpen && pointInRect(x, y, 16, 12, 58, 54) {
 			sidebarOpen = true
 			layoutSearchBox()
 			invalidate(hwnd)
@@ -482,6 +481,7 @@ func createSearchBox(parent uintptr) uintptr {
 
 	if edit != 0 {
 		setFont(edit, uiFont)
+
 		margin := uintptr(8) | (uintptr(8) << 16)
 		procSendMessageW.Call(edit, EM_SETMARGINS, EC_LEFTMARGIN, margin)
 		procSendMessageW.Call(
@@ -539,7 +539,7 @@ func main() {
 	mainWindow = hwnd
 	searchBox = createSearchBox(hwnd)
 
-	procShowWindow.Call(hwnd, SW_SHOW)
+	procShowWindow.Call(hwnd, SW_SHOWMAXIMIZED)
 	procUpdateWindow.Call(hwnd)
 	layoutSearchBox()
 
