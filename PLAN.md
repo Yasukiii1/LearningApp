@@ -42,10 +42,14 @@ This is Unicode Mathematical Bold styling, not the name of a normal UI font. Fin
 ### Sidebar
 
 - The application will have a collapsible sidebar.
-- The sidebar toggle will be at the top-left.
-- Next to/alongside the top-left navigation area, there will be a small search bar for searching saved note names.
+- The top-left navigation row will be:
+  [ Search notes... ]  [☰]
+- The search field will be used to search saved note names.
 - The sidebar will initially contain at least five icon slots/buttons as placeholders.
 - The purposes, names, and final icons for those five or more slots are not decided yet.
+- Slightly above the bottom of the sidebar there will be a profile row containing a profile icon/avatar and the user's name, following a compact layout similar to the ChatGPT sidebar.
+- At the bottom of the sidebar there will be a simple Settings item/button.
+- Settings is a placeholder for now and will do nothing initially.
 - The sidebar's detailed layout, sizing, spacing, active states, and visual styling will be planned before implementation.
 - Hover/meaning indicators and their animations are planned for a later stage after the base UI is complete.
 
