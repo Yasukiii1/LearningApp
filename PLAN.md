@@ -42,11 +42,13 @@ This is Unicode Mathematical Bold styling, not the name of a normal UI font. Fin
 ### Sidebar
 
 - The application will have a collapsible sidebar.
-- The sidebar open/close control will be positioned at the top-left, inspired by the compact sidebar toggle used in ChatGPT.
-- A search button will be part of the sidebar/navigation area.
-- The specific sidebar icons, labels, layout, and visual design will be planned separately.
+- The sidebar toggle will be at the top-left.
+- Next to/alongside the top-left navigation area, there will be a small search bar for searching saved note names.
+- The sidebar will initially contain at least five icon slots/buttons as placeholders.
+- The purposes, names, and final icons for those five or more slots are not decided yet.
+- The sidebar's detailed layout, sizing, spacing, active states, and visual styling will be planned before implementation.
 - Hover/meaning indicators and their animations are planned for a later stage after the base UI is complete.
 
 ## Planning status
 
-Detailed application planning is still in progress.
+Sidebar planning is currently the first major planning task. Chapters and other learning systems will be planned later.
