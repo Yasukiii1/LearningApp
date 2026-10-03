@@ -52,16 +52,21 @@ This is Unicode Mathematical Bold styling, not the name of a normal UI font. Fin
 - The application will have a collapsible sidebar.
 - The sidebar will use a clean, light grey/white visual direction rather than the earlier yellow palette.
 - The top-left area will contain the LearningApp app mark.
-- The top navigation/search area will contain a compact note-name search field and the sidebar toggle.
+- The top navigation/search area will contain a compact note-name search field followed by the sidebar toggle.
+- The sidebar base UI is being kept modular, with UI drawing separated from the main Windows message-loop code to reduce the chance of unrelated UI changes breaking the application.
 - The search field will be used to search saved note names.
 - The sidebar will initially contain at least five blank smooth square icon slots/buttons as placeholders.
 - The purposes, names, and final icons for those five or more slots are not decided yet.
 - Slightly above the bottom of the sidebar there will be a profile row containing a profile icon/avatar and the user's name, following the compact structure of the visual reference.
-- At the bottom of the sidebar there will be a simple Settings item/button with a dedicated small icon area.
+- At the bottom of the sidebar there will be a compact Settings utility using a small dedicated gear-icon area, rather than a large full-width Settings box.
 - Settings is a placeholder for now and will do nothing initially.
 - The reference's compact notification/utility-control idea can be used as inspiration for a future LearningApp utility control.
 - Hover/meaning indicators and their animations are planned for a later stage after the base UI is complete.
 - Sidebar interactions and exact icon meanings will be decided later.
+
+### Reference-specific placement
+- The reference's lower-left utility area is the visual inspiration for the compact Settings placement.
+- The reference does not itself show a literal LearningApp Settings button; LearningApp adapts the compact lower utility treatment for its own Settings control.
 
 ### Application window
 
