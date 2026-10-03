@@ -38,21 +38,30 @@ Preferred text style reference:
 
 This is Unicode Mathematical Bold styling, not the name of a normal UI font. Final UI typography has not been chosen yet.
 
+### External visual reference
+
+- Dribbble shot: "Sidebar navigation for Dashboard" by Tran Mau Tri Tam.
+- LearningApp may use the shot as close visual inspiration for sidebar composition, hierarchy, spacing, compact controls, and general interaction patterns.
+- LearningApp will use its own text, branding, icons, colors, dimensions, and detailed visual treatment rather than making a pixel-for-pixel copy.
+- The bottom-right image-upload area from the reference is not part of LearningApp's planned sidebar.
+
 ## Accepted UI planning
 
 ### Sidebar
 
 - The application will have a collapsible sidebar.
-- The top-left navigation row will be:
-  [ Search notes... ]  [☰]
+- The sidebar will use a clean, light grey/white visual direction rather than the earlier yellow palette.
+- The top-left area will contain the LearningApp app mark.
+- The top navigation/search area will contain a compact note-name search field and the sidebar toggle.
 - The search field will be used to search saved note names.
 - The sidebar will initially contain at least five blank smooth square icon slots/buttons as placeholders.
 - The purposes, names, and final icons for those five or more slots are not decided yet.
-- Slightly above the bottom of the sidebar there will be a profile row containing a profile icon/avatar and the user's name, following a compact layout similar to the ChatGPT sidebar.
-- At the bottom of the sidebar there will be a simple Settings item/button.
+- Slightly above the bottom of the sidebar there will be a profile row containing a profile icon/avatar and the user's name, following the compact structure of the visual reference.
+- At the bottom of the sidebar there will be a simple Settings item/button with a dedicated small icon area.
 - Settings is a placeholder for now and will do nothing initially.
-- The sidebar's detailed layout, sizing, spacing, active states, and visual styling will be refined after the base UI is working.
+- The reference's compact notification/utility-control idea can be used as inspiration for a future LearningApp utility control.
 - Hover/meaning indicators and their animations are planned for a later stage after the base UI is complete.
+- Sidebar interactions and exact icon meanings will be decided later.
 
 ### Application window
 
@@ -62,11 +71,10 @@ This is Unicode Mathematical Bold styling, not the name of a normal UI font. Fin
 
 ### Visual direction
 
-- Keep the existing overall sidebar structure rather than replacing it with a different navigation model.
-- Move the base palette away from yellow toward a clean neutral grey/white appearance.
-- Keep controls simple, light, rounded, and visually restrained.
+- Keep the existing overall sidebar composition rather than replacing it with a different navigation model.
+- Use whitespace, restrained borders, rounded corners, and light neutral surfaces.
 - Blank square sidebar icons remain intentionally blank until their purposes are decided.
-- The sidebar direction takes general inspiration from modern note/knowledge applications that combine a compact search area, sparse navigation, and lower utility/profile controls.
+- The overall feel should be compact, minimal, modern, and suitable for a learning/knowledge application.
 
 ## Accepted initial subjects
 
